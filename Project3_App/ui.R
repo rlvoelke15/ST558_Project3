@@ -1,33 +1,38 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
+library(shinythemes)
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
+# Define UI for Shiny Application
+shinyUI(fluidPage(theme = shinytheme("united"),
 
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    # Application Title with Image Embedded
+    titlePanel(title=div(img(src = "nba-logo.jpg", height = 102, width = 102), "2020-2021 NBA Player Stats - Regular Season")),
 
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
-        )
+    tabsetPanel(
+        tabPanel("About", fluid = TRUE,
+                 mainPanel(
+                     br(),
+                     wellPanel(h4("This application is designed to allow users to explore patterns and relationships across a variety of aggregated statistics on NBA Players for the 2020-2021 Regular Season."),
+                     em("Note: This does not include Playoff Game Data."),
+                     br(),
+                     h4(uiOutput("homePage")),
+                     "A variety of cumulative statistics, including...[insert select variables here]... is provided across 600+ active NBA players. This data will support the interactive analyses, in this application.",
+                     uiOutput("dataSource"),
+                     br(),
+                     h4("Data Exploration Page"),
+                     "This page allows the user to create various numerical and graphical summaries using the data of their choosing.",
+                     h4("Modeling Page"),
+                     "This page, which has multiple subsetted tabs, allows the user to model and fit the data of their choosing. It alsow allows the user to obtain a prediction for a response variable against any of their fitted models.",
+                     h4("Data Page"),
+                     "This page allows the user to explore the raw data set and download it (or a filtered version of it) to their local desktop.",
+                 ))),
+        tabPanel("Data Exploration", fluid = TRUE),
+        tabPanel("Modeling", fluid = TRUE,
+                 tabsetPanel(
+                     tabPanel("Modeling Info", fluid = TRUE),
+                     tabPanel("Model Fitting", fluid = TRUE),
+                     tabPanel("Prediction", fluid = TRUE)
+                 )),
+        tabPanel("Data", fluid = TRUE)
     )
 ))

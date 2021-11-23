@@ -1,16 +1,19 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
 
-# Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+# Define Server Logic Required to Build Application
+shinyServer(function(input, output, session) {
+    
+    # Create Hyperlinks for About Page
+    output$dataSource <- renderUI({
+        url <- a(href="https://www.nbastuffer.com/2020-2021-nba-player-stats/", target="_blank","Click Here")
+        tagList(url, " to access the Source Data")
+    })
+    
+    output$homePage <- renderUI({
+        url <- a(href="https://www.nbastuffer.com/", target="_blank","NBAStuffer Website,")
+        tagList("This particular dataset comes from the ", url, " a reference hub that provides 'unique metrics and NBA analytics content'.")
+    })
 
     output$distPlot <- renderPlot({
 

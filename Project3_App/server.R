@@ -15,15 +15,34 @@ shinyServer(function(input, output, session) {
         tagList("This particular dataset comes from the ", url, " a reference hub that provides 'unique metrics and NBA analytics content'.")
     })
 
-    output$distPlot <- renderPlot({
-
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-
+    output$scatterPlot <- renderPlot({
+        
+        filteredData <- rawData2 %>% filter(TEAM == input$Team)
+        
+        if(input$X1 == "Rebounds per Game"){
+            g <- ggplot(filteredData, aes(x= RPG, y = PPG))
+            g + geom_point()} else if(input$X1 == "Assists per Game"){
+                g <- ggplot(filteredData, aes(x= APG, y = PPG))
+                g + geom_point()} else if(input$X1 == "Steals per Game"){
+        g <- ggplot(filteredData, aes(x= SPG, y = PPG))
+        g + geom_point()} else if(input$X1 == "Blocks per Game"){
+                    g <- ggplot(filteredData, aes(x= BPG, y = PPG))
+                    g + geom_point()} else{
+                    g <- ggplot(filteredData, aes(x= TOPG, y = PPG))
+                    g + geom_point()}
     })
-
+    
+    output$barPlot <- renderPlot({
+        
+        filteredData <- rawData2 %>% filter(TEAM == input$Team) %>% filter(POS == input$Position)
+        
+        if(input$Y1 == "Offensive Rating"){
+            g <- ggplot(filteredData, aes(x= `FULL NAME`, y = ORTG))
+                g + geom_bar(stat = "identity")} else {
+                    g <- ggplot(filteredData, aes(x= `FULL NAME`, y = DRTG))
+                    g + geom_bar(stat = "identity")
+                }
+        
+    })
 })
+

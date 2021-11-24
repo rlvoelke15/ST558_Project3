@@ -51,7 +51,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
                     conditionalPanel(condition = "input.Y1 != 'Points per Game'", radioButtons("Position", "Select a Position", choices = c("Guard" = "G", "Forward" = "F", "Center" = "C"), selected = "G")),
                     conditionalPanel(condition = "input.Y1 != 'Points per Game'", sliderInput("Slider", "Minutes per Game", min = 1, max = 30, value = 1, step = 5)),
                     conditionalPanel(condition = "input.Y1 != 'Points per Game'", uiOutput("minPlayed")),
-                    conditionalPanel(condition = "input.Y1 == 'Points per Game'", selectInput("X1", "Select a Predictor Variable of Interest (X-Axis)", choices = list("Rebounds per Game", "Assists per Game", "Steals per Game", "Blocks per Game", "Turnovers per Game"))),
+                    conditionalPanel(condition = "input.Y1 == 'Points per Game'", selectInput("X1", "Select a Predictor Variable of Interest (X-Axis)", choices = list("Rebounds per Game", "Assists per Game", "Steals per Game", "Blocks per Game", "Turnovers per Game")))
                     ),
                     mainPanel(
                         conditionalPanel(condition = "input.AllTeams == false & input.Y1 == 'Points per Game'", plotOutput("scatterPlot")),
@@ -68,6 +68,23 @@ shinyUI(fluidPage(theme = shinytheme("united"),
                      tabPanel("Model Fitting", fluid = TRUE),
                      tabPanel("Prediction", fluid = TRUE)
                  )),
-        tabPanel("Data", fluid = TRUE)
+        tabPanel("Data", fluid = TRUE,
+            # App title
+            titlePanel("Download Data"),
+                 
+            # Sidebar Layout
+                 sidebarLayout(
+                    sidebarPanel(
+                        
+                         # Input: Choose a Data Set
+                         checkboxInput("fulldata", "Select Full Data Set", value = TRUE),
+                         conditionalPanel(condition = "input.fulldata == false", selectizeInput("dataset", "Choose a Data Set:", choices = c("choose" = "", levels(rawData2$TEAM)), select = "Atl"),
+                         # Button
+                         actionButton("downloadData", "Download")
+                     )),
+                     # Main panel for displaying outputs
+                     mainPanel(
+                         conditionalPanel(condition = "input.fulldata == true", dataTableOutput("fullDownload")),
+                         conditionalPanel(condition = "input.fulldata == false", dataTableOutput("download"))
     )
-))
+)))))

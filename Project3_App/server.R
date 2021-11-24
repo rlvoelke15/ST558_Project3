@@ -97,4 +97,23 @@ shinyServer(function(input, output, session) {
         tab <- rawData2[ , c("FullName", "TEAM", "Position_New", "PPG", "RPG", "APG", "SPG", "BPG", "TOPG", "ORTG", "DRTG")]
         datatable(tab)
     })
+    
+    output$fullDownload <- renderDataTable({
+        datatable(rawData2)
+    })
+    
+    output$download <- renderDataTable({
+        filteredData <- filter(rawData2, TEAM == input$dataset)
+        datatable(filteredData)
+    })
+    
+    # Downloadable csv of selected Data Set
+    output$downloadData <- downloadHandler(
+        filename = function() {
+            paste(input$dataset, ".csv", sep = "")
+        },
+        content = function(file) {
+            write.csv(output$download, , row.names = FALSE)
+        }
+    )
 })

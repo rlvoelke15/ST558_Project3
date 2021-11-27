@@ -98,22 +98,42 @@ shinyServer(function(input, output, session) {
         datatable(tab)
     })
     
-    output$fullDownload <- renderDataTable({
-        datatable(rawData2)
-    })
-    
-    output$download <- renderDataTable({
-        filteredData <- filter(rawData2, TEAM == input$dataset)
-        datatable(filteredData)
-    })
-    
-    # Downloadable csv of selected Data Set
-    output$downloadData <- downloadHandler(
-        filename = function() {
-            paste(input$dataset, ".csv", sep = "")
-        },
-        content = function(file) {
-            write.csv(output$download, , row.names = FALSE)
+    output$training <- renderDataTable({
+        
+        rawData3 <- rawData2 %>% mutate_at(vars(ORTG:DRTG), ~replace(., is.na(.), 0))
+        
+        if(input$Y2 == "Points per Game"){
+            trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
+            
+            trainData <- rawData3[trainIndex,]
+            testData <- rawData3[-trainIndex,]
+            datatable(trainData)
+            
+        } else if (input$Y2 == "Offensive Rating"){
+            trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
+            
+            trainData <- rawData3[trainIndex,]
+            testData <- rawData3[-trainIndex,]
+            
+            datatable(trainData)
+            
+        } else {
+            trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
+            
+            trainData <- rawData3[trainIndex,]
+            testData <- rawData3[-trainIndex,]
+            
+            datatable(trainData)
         }
-    )
+    })
+        
+    output$RegTree <- renderUI({
+        # Define Tuning Parameters for Regression Tree
+        cp <- 0:0.1
+        df <- expand.grid(cp = cp)
+        
+        # Fit Classification Tree Model
+        regFit <- train(PPG ~ input$Preds, data = trainData, method = "rpart", 
+                          trControl = trainControl(method = "repeatedcv", number = input$CV, repeats = input$Repeats), tuneGrid = df)
+    })
 })

@@ -65,7 +65,24 @@ shinyUI(fluidPage(theme = shinytheme("united"),
         tabPanel("Modeling", fluid = TRUE,
                  tabsetPanel(
                      tabPanel("Modeling Info", fluid = TRUE),
-                     tabPanel("Model Fitting", fluid = TRUE),
+                     tabPanel("Model Fitting", fluid = TRUE,
+                              sidebarLayout(
+                                  sidebarPanel(
+                              wellPanel(radioButtons("Y2", "Select a Response Variable of Interest", choices = c("Points per Game", "Offensive Rating", "Defensive Rating")),
+                              conditionalPanel(condition = "input.Y2 == 'Points per Game'", checkboxGroupInput("Preds1", "Select Predictor Variables",c("RPG", "APG", "BPG", "SPG", "TOPG"))),
+                              conditionalPanel(condition = "input.Y2 != 'Points per Game'", checkboxGroupInput("Preds2", "Select Predictor Variables", c("Postion", "MPG", "PPG")))),
+                              br(),
+                              wellPanel(h4("Select the Size of Your Training Set:"),
+                              numericInput("NI","Enter a Number between 0 and 1", value = 0.8, min = 0, max = 1, step = 0.05),
+                              em("Note: Your Test Set will Default to the Remaining Obs. not used in your Training Set"),
+                              br(),
+                              numericInput("CV", "Select the Number of Cross Validation Folds", value = 5, min = 1, max =10, step = 1),
+                              numericInput("Repeats", "Select the Number of Repetitions for Cross Validation", value = 3, min = 1, max =10, step = 1)),
+                              ),
+                              mainPanel(
+                                  h3("Training Data Set"),
+                                  dataTableOutput("training")
+                              ))),
                      tabPanel("Prediction", fluid = TRUE)
                  )),
         tabPanel("Data", fluid = TRUE,

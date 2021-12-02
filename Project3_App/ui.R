@@ -114,12 +114,13 @@ shinyUI(fluidPage(theme = shinytheme("united"),
                 br(),
                 h5("Random Forest Tree Criterion:"),
                 numericInput("CV2", "Select the Number of Cross Validation Folds", value = 5, min = 1, max =10, step = 1),
-                numericInput("Repeats2", "Select the Number of Repetitions for Cross Validation", value = 3, min = 1, max =10, step = 1),
+                numericInput("Repeats2", "Select the Number of Repetitions for Cross Validation", value = 3, min = 1, max =10, step = 1)
               ),
-              wellPanel(actionButton("Run", "Fit Models",)
+              wellPanel(actionButton("Run", "Fit Models")
               )
             ),
             mainPanel(
+              em("Define Model Criterion and hit 'Fit Models' Button to Generate Model Fit Statistics Below"),
               h4("Multiple Linear Regression Summary Statistics - Training Data"),
               verbatimTextOutput("MLR"),
               h4("Multiple Linear Regression Summary Statistics - Test Data"),
@@ -129,15 +130,45 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               h4("Regression Tree Summary Statistics - Test Data"),
               verbatimTextOutput("regTreeTest"),
               h4("Random Forest Tree Summary Statistics - Training Data"),
-              # verbatimTextOutput("rfTree"),
-              h4("Random Forest Tree Summary Statistics - Test Data"),
+              verbatimTextOutput("rfTree"),
+              h4("Random Forest Tree Summary Statistics - Test Data")
               # verbatimTextOutput("rfTreeTest")
             )
           )
         ),
-        tabPanel("Prediction", fluid = TRUE)
+        tabPanel("Prediction", fluid = TRUE,
+          sidebarLayout(
+            sidebarPanel(
+              em("Please enter a value between 0 and 20 in each of the fields below and press 'Predict' Button to generate the estimated Points per Game (PPG) for a given player."),
+              br(),
+              br(),
+              numericInput("Pred1", "Select the Value of RPG", value = 0, min = 0, max = 20, step = 1),
+              numericInput("Pred2", "Select the Value of APG", value = 0, min = 0, max = 20, step = 1),
+              numericInput("Pred3", "Select the Value of SPG", value = 0, min = 0, max = 20, step = 1),
+              numericInput("Pred4", "Select the Value of BPG", value = 0, min = 0, max = 20, step = 1),
+              numericInput("Pred5", "Select the Value of TOPG", value = 0, min = 0, max = 20, step = 1),
+              actionButton("Predict", "Predict")
+            ),
+            mainPanel(
+              wellPanel(h4("Predition Model"),
+              "For this prediction, we will be looking at the Multiple Linear Regression Model",
+              br(),
+              br(),
+              "Points per Game = Rebounds per Game + Assists per Game + Blocks per Game + Steals per Game + Turnovers per Game",
+              br(),
+              br(),
+              em("Refer to Below Coefficients Used for this Calculation"),
+              br(),
+              br(),
+              verbatimTextOutput("coefficients")
+              ),
+              wellPanel(h4(uiOutput("prediction"))
+              )
+            )
+          )
       )
-    ),
+    )
+  ),
     tabPanel("Data", fluid = TRUE)
-  )
+    )
 ))

@@ -97,143 +97,127 @@ shinyServer(function(input, output, session) {
     datatable(tab)
   })
   
-  output$MLR <- renderPrint({
+  trainingData <- reactive({
     rawData3 <- rawData2 %>% mutate_at(vars(ORTG:DRTG), ~replace(., is.na(.), 0))  
+    trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
+    trainData <- rawData3[trainIndex,]
+  })
+  
+  testData <- reactive({
+    rawData3 <- rawData2 %>% mutate_at(vars(ORTG:DRTG), ~replace(., is.na(.), 0))  
+    trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
+    testData <- rawData3[-trainIndex,]
+  })
+  
+  modelFitsMLRTrain <- eventReactive(input$Run, {
     if(input$Y2 == "PPG"){
-      trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
-      trainData <- rawData3[trainIndex,]
-      testData <- rawData3[-trainIndex,]
-    
       # Multiple Linear Regression Fit
-      mlrFit <- lm(PPG ~ input$Preds1, data = trainData)
+      mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainingData())
       mlrFit
       summary(mlrFit)}
-      else if (input$Y2 == "ORTG"){
-        trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
-        trainData <- rawData3[trainIndex,]
-        testData <- rawData3[-trainIndex,]
-        
-        # Multiple Linear Regression Fit
-        mlrFit <- lm(ORTG ~ Position_New+MPG+PPG, data = trainData)
-        mlrFit
-        summary(mlrFit)}
-        else{
-          trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
-          trainData <- rawData3[trainIndex,]
-          testData <- rawData3[-trainIndex,]
-          
-          # Multiple Linear Regression Fit
-          mlrFit <- lm(DRTG ~ Position_New+MPG+PPG, data = trainData)
-          mlrFit
-          summary(mlrFit)
-        }
+    else if (input$Y2 == "ORTG"){
+      mlrFit <- lm(ORTG ~ Position_New+MPG+PPG, data = trainingData())
+      mlrFit
+      summary(mlrFit)}
+    else{
+      mlrFit <- lm(DRTG ~ Position_New+MPG+PPG, data = trainingData())
+      mlrFit
+      summary(mlrFit)}
+    })
+  
+  output$MLR <- renderPrint({
+    modelFitsMLRTrain()
+  })
+  
+  modelFitsMLRTest <- eventReactive(input$Run, {
+    if(input$Y2 == "PPG"){
+      mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = testData())
+      mlrFit
+      summary(mlrFit)}
+    else if (input$Y2 == "ORTG"){
+      mlrFit <- lm(ORTG ~ Position_New+MPG+PPG, data = testData())
+      mlrFit
+      summary(mlrFit)}
+    else{
+      mlrFit <- lm(DRTG ~ Position_New+MPG+PPG, data = testData())
+      mlrFit
+      summary(mlrFit)}
   })
   
   output$MLRTest <- renderPrint({
-    rawData3 <- rawData2 %>% mutate_at(vars(ORTG:DRTG), ~replace(., is.na(.), 0))  
-    if(input$Y2 == "PPG"){
-      trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
-      trainData <- rawData3[trainIndex,]
-      testData <- rawData3[-trainIndex,]
-      
-      # Multiple Linear Regression Fit
-      mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = testData)
-      mlrFit
-      summary(mlrFit)}
-      else if (input$Y2 == "ORTG"){
-        trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
-        trainData <- rawData3[trainIndex,]
-        testData <- rawData3[-trainIndex,]
-      
-        # Multiple Linear Regression Fit
-        mlrFit <- lm(ORTG ~ Position_New+MPG+PPG, data = testData)
-        mlrFit
-        summary(mlrFit)}
-        else{
-          trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
-          trainData <- rawData3[trainIndex,]
-          testData <- rawData3[-trainIndex,]
-      
-          # Multiple Linear Regression Fit
-          mlrFit <- lm(DRTG ~ Position_New+MPG+PPG, data = testData)
-          mlrFit
-          summary(mlrFit)}
+   modelFitsMLRTest()
   })
   
-  output$regTree <- renderPrint({
-  # Define Tuning Parameters for Regression Tree
-    cp <- 0:0.1
-    df <- expand.grid(cp = cp)
-        
-  # Fit Regression Tree Model
-    if(input$Y2 == "PPG"){
-      trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
-      regFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-      regFit}
-      else if(input$Y2 == "ORTG"){
-        trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
-        regFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-        regFit}
-        else{
-          trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
-          regFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-          regFit}
-  })
-  
-  output$regTreeTest <- renderPrint({
+  modelFitsRegTrain <- eventReactive(input$Run, {
     # Define Tuning Parameters for Regression Tree
     cp <- 0:0.1
     df <- expand.grid(cp = cp)
     
     # Fit Regression Tree Model
     if(input$Y2 == "PPG"){
-      trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
-      regFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-      
-      # Check Regression Tree Model on Test Data
-      predReg <- predict(regFit, newdata = testData)
-      postResample(testData$PPG, predReg)}
-      else if(input$Y2 == "ORTG"){
-        trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
-        regFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-      
-        # Check Regression Tree Model on Test Data
-        predReg <- predict(regFit, newdata = testData)
-        postResample(testData$PPG, predReg)}
-        else{
-          trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
-          regFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainData, method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
-          # Check Regression Tree Model on Test Data
-          predReg <- predict(regFit, newdata = testData)
-          postResample(testData$PPG, predReg)}
+      regFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      regFit}
+    else if(input$Y2 == "ORTG"){
+      regFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      regFit}
+    else{
+      regFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      regFit}
   })
   
-  output$rfTree <- renderPrint({
+  modelFitsRegTest <- eventReactive(input$Run, {
+    # Define Tuning Parameters for Regression Tree
+    cp <- 0:0.1
+    df <- expand.grid(cp = cp)
     
-    withProgress(message = "Modeling in Progress", detail = "Please be Patient", value = 0, {
-      for (i in 1:10) {
-        incProgress(1/15)
-        Sys.sleep(2)
-      }
-    })
-    
+    # Fit Regression Tree Model
+    if(input$Y2 == "PPG"){
+      regFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      
+      # Check Regression Tree Model on Test Data
+      predReg <- predict(regFit, newdata = testData())
+      postResample(testData()$PPG, predReg)}
+    else if(input$Y2 == "ORTG"){
+      regFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      
+      # Check Regression Tree Model on Test Data
+      predReg <- predict(regFit, newdata = testData())
+      postResample(testData()$PPG, predReg)}
+    else{
+      regFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rpart", trControl = trainControl(method = "repeatedcv", number = input$CV1, repeats = input$Repeats1), tuneGrid = df)
+      # Check Regression Tree Model on Test Data
+      predReg <- predict(regFit, newdata = testData())
+      postResample(testData()$PPG, predReg)}
+  })
+  
+  output$regTree <- renderPrint({
+    modelFitsRegTest()
+  })
+  
+  modelFitsRFTrain <- eventReactive(input$Run, {
     # Define Tuning Parameters for Random Forest Tree
     mtry <- 1:15
     df <- expand.grid(mtry = mtry)
     
     # Fit Random Forest Tree Model
     if(input$Y2 == "PPG"){
-      trainIndex <- createDataPartition(rawData3$PPG, p = input$NI, list = FALSE)
-      rfFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainData, method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
+      rfFit <- train(PPG ~ RPG+APG+BPG+SPG+TOPG, data = trainingData(), method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
       rfFit}
-      else if(input$Y2 == "ORTG"){
-        trainIndex <- createDataPartition(rawData3$ORTG, p = input$NI, list = FALSE)
-        rfFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainData, method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
-        rfFit}
-        else{
-          trainIndex <- createDataPartition(rawData3$DRTG, p = input$NI, list = FALSE)
-          rfFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainData, method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
-          rfFit}
+    else if(input$Y2 == "ORTG"){
+      rfFit <- train(ORTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
+      rfFit}
+    else{
+      rfFit <- train(DRTG ~ Position_New+MPG+PPG, data = trainingData(), method = "rf", trControl = trainControl(method = "repeatedcv", number = input$CV2, repeats = input$Repeats2), tuneGrid = df)
+      rfFit}
+  })
+  
+  output$rfTree <- renderPrint({
+    withProgress(message = "Modeling in Progress", detail = "Please be Patient", value = 0, {
+      for (i in 1:100) {
+        incProgress(1/15)
+      }
+    modelFitsRFTrain()
+    })
   })
     
   output$rfTreeTest <- renderPrint({
@@ -261,4 +245,27 @@ shinyServer(function(input, output, session) {
           predRF <- predict(rfFit, newdata = testData)
           postResample(testData$PPG, predRF)}
   })
+  
+  predictionModel <- eventReactive(input$Predict, {
+    
+    mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = testData())
+    mlrFit
+    
+    pred <- (mlrFit$coefficients[2]*input$Pred1 + mlrFit$coefficients[3]*input$Pred2 + mlrFit$coefficients[4]*input$Pred3 + mlrFit$coefficients[5]*input$Pred4 + mlrFit$coefficients[6]*input$Pred5)
+    pred
+    
+  })
+  
+  output$prediction <- renderUI({
+    text1 <- "The estimated Points per Game (PPG) for the combination of predictor variables is "
+    predict <- round(predictionModel(), digits = 0)
+    paste(text1, predict)
+  })
+  
+  output$coefficients <- renderPrint({
+    mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = testData())
+    mlrFit$coefficients
+  })
+  
+
 })

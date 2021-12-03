@@ -75,7 +75,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
             wellPanel(
               h3("Multiple Linear Regression Model"),
               h4("Benefits"),
-              "INSERT BENEFITS HERE",
+              "A key benefit of using Mulitiple Linear Regression is that the user has the ability to include multiple predictor variables and/or higher order terms in their model. This provides us further insight into our data that we might not have with a Single Multiple Linear Regression Model.",
               h4("Drawbacks"),
               "INSERT DRABACKS HERE"
             ),
@@ -104,8 +104,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               ),
               wellPanel(h4("Select Variables of Interest:"),
                 radioButtons("Y2", "Select a Response Variable", choices = c("Points per Game" = "PPG", "Offensive Rating" = "ORTG", "Defensive Rating" = "DRTG")),
-                conditionalPanel(condition = "input.Y2 == 'PPG'", checkboxGroupInput("Preds1", "Select Predictor Variables",c("Rebouds per Game" = "RPG", "Assists per Game" = "APG", "Blocks per Game" = "BPG", "Steals per Game" = "SPG", "Turnovers per Game" = "TOPG"), selected = "Rebounds per Game")),
-                conditionalPanel(condition = "input.Y2 != 'PPG'", checkboxGroupInput("Preds2", "Select Predictor Variables", c("Postion" = "Position_New", "Minutes per Game" = "MPG", "Points per Game" = "PPG")))
+              checkboxGroupInput("Preds1", "Select Predictor Variables",c("Rebouds per Game" = "RPG", "Assists per Game" = "APG", "Blocks per Game" = "BPG", "Steals per Game" = "SPG", "Turnovers per Game" = "TOPG", "Postion" = "Position_New", "Minutes per Game" = "MPG"), selected = "RPG"),
               ),
               wellPanel(h4("Select Tree Model Criterion:"),
                 h5("Regression Tree Criterion:"),
@@ -126,11 +125,11 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               h4("Multiple Linear Regression Summary Statistics - Test Data"),
               verbatimTextOutput("MLRTest"),
               h4("Regression Tree Summary Statistics - Training Data"),
-              verbatimTextOutput("regTree"),
+              verbatimTextOutput("regTrain"),
               h4("Regression Tree Summary Statistics - Test Data"),
-              verbatimTextOutput("regTreeTest"),
+              verbatimTextOutput("regTest"),
               h4("Random Forest Tree Summary Statistics - Training Data"),
-              verbatimTextOutput("rfTree"),
+              # verbatimTextOutput("rfTree"),
               h4("Random Forest Tree Summary Statistics - Test Data")
               # verbatimTextOutput("rfTreeTest")
             )
@@ -150,17 +149,16 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               actionButton("Predict", "Predict")
             ),
             mainPanel(
-              wellPanel(h4("Predition Model"),
-              "For this prediction, we will be looking at the Multiple Linear Regression Model",
-              br(),
-              br(),
-              "Points per Game = Rebounds per Game + Assists per Game + Blocks per Game + Steals per Game + Turnovers per Game",
-              br(),
-              br(),
-              em("Refer to Below Coefficients Used for this Calculation"),
-              br(),
-              br(),
-              verbatimTextOutput("coefficients")
+              wellPanel(h4("Prediction Model"),
+                        "For this prediction, we will be looking at a version the Multiple Linear Regression Model that uses the following predictor variables:",
+                        br(),
+                        em("Reboounds per Game, Assists per Game, Blocks per Game, Steals per Game, and Turnovers per Game"),
+                        br(),
+                        br(),
+                        em("Refer to Below Coefficients Used for this Calculation"),
+                        br(),
+                        br(),
+                        verbatimTextOutput("coefficients")
               ),
               wellPanel(h4(uiOutput("prediction"))
               )

@@ -8,7 +8,9 @@ shinyUI(fluidPage(theme = shinytheme("united"),
   # Application Title with Image Embedded
   titlePanel(title=div(img(src = "nba-logo.jpg", height = 102, width = 102), "2020-2021 NBA Player Stats - Regular Season")),
 
+  # Create Tab Layout
   tabsetPanel(
+    # Create About Tab
     tabPanel("About", fluid = TRUE,
       mainPanel(
         br(),
@@ -41,6 +43,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
         )
       )
     ),
+    # Create Data Exploration Tab
     tabPanel("Data Exploration", fluid = TRUE,
       sidebarLayout(
         sidebarPanel(
@@ -69,8 +72,10 @@ shinyUI(fluidPage(theme = shinytheme("united"),
         )
       )
     ),
+    # Create Modeling Tab with Subset Tabs
     tabPanel("Modeling", fluid = TRUE,
       tabsetPanel(
+        # Create Modeling Information Tab
         tabPanel("Modeling Info", fluid = TRUE,
           mainPanel(
             br(),
@@ -99,6 +104,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
             )
           )
         ),
+        # Create Model Fitting Tab
         tabPanel("Model Fitting", fluid = TRUE,
           sidebarLayout(
             sidebarPanel(
@@ -139,6 +145,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
             )
           )
         ),
+        # Create Model Prediction Tab
         tabPanel("Prediction", fluid = TRUE,
           sidebarLayout(
             sidebarPanel(
@@ -168,9 +175,10 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               )
             )
           )
+        )
       )
-    )
-  ),
+    ),
+    # Create Data Download Tab
     tabPanel("Data", fluid = TRUE,
       sidebarLayout(
         sidebarPanel(
@@ -189,6 +197,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
           conditionalPanel(condition = "input.Unfiltered == true", DT::dataTableOutput("downloadTable")),
           conditionalPanel(condition = "input.Unfiltered == false", DT::dataTableOutput("downloadTableFilt"))
         )
-      ))
       )
+    )
+  )
 ))

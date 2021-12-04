@@ -15,17 +15,22 @@ In order to use this app, please make sure you install the following packages in
 The user should also download the rawData2.csv file in order to successfully run this application and run the following code. Please see below: 
 
 `library(shiny)`
+
 `library(shinythemes)`
+
 `library(tidyverse)`
+
 `library(DT)`
+
 `library(caret)`
 
 `rawData2 <- read_csv("https://raw.githubusercontent.com/rlvoelke15/ST558_Project3/main/rawData2.csv")`
 
 `rawData2$TEAM <- as.factor(rawData2$TEAM)` 
+
 `rawData2$Position_New <- as.factor(rawData2$Position_New)`
 
-Once the above code has been run, the user can run the following code in their R console to access this application!
+Once all of the above code has been run, the user can run the following code in their R console to access this application!
 
 `shiny::runGitHub("ST558_Project3", "rlvoelke15", ref = "main", subdir = "Project3_App")`
 

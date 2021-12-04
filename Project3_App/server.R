@@ -3,7 +3,7 @@ library(shiny)
 
 # Define Server Logic Required to Build Application
 shinyServer(function(input, output, session) {
-    
+  
 # Create Hyperlinks for About Page
   output$dataSource <- renderUI({
     url <- a(href="https://www.nbastuffer.com/2020-2021-nba-player-stats/", target="_blank","Click Here")
@@ -84,15 +84,30 @@ shinyServer(function(input, output, session) {
   output$avgMinPlayed <- renderUI({
     filteredData <- rawData2 %>% filter(TEAM == input$Team) %>% filter(Position_New == input$Position)
         
-    text1 <- "The average minutes played by "
+    text1 <- "Numeric Summary: The average minutes played by "
     text2 <- "s on "
     text3 <- " is "
     average <- round(mean(filteredData$MPG), digits = 2)
     paste(text1, input$Position, text2, input$Team, text3, average)
   })
+  
+  output$scatterPoint <- renderUI({
+    text1 <- "Each Point Represents an Individual Player on "
+    paste(text1, input$Team)
+  })
+  
+  output$barSum <- renderUI({
+    text1 <- "Bars Represent the Sum of "
+    text2 <- " Across the NBA, per Team"
+    paste(text1, input$Y1, text2)
+  })
+  
+  output$math <- renderUI({
+    withMathJax(helpText('Example:  x_1^2 + x_2^2 + ... + x_i^2'))
+  })
     
-# Create the Data Table
-  output$table <- renderDataTable({
+# Create the Data Table 1
+  output$table <- DT::renderDataTable({
     tab <- rawData2[ , c("FullName", "TEAM", "Position_New", "PPG", "RPG", "APG", "SPG", "BPG", "TOPG", "ORTG", "DRTG")]
     datatable(tab)
   })
@@ -232,6 +247,20 @@ shinyServer(function(input, output, session) {
   output$coefficients <- renderPrint({
     mlrFit <- lm(PPG ~ RPG+APG+BPG+SPG+TOPG, data = testData())
     mlrFit$coefficients
+  })
+  
+  # Create the Data Table 2
+  output$downloadTable <- DT::renderDataTable({
+    tab <- rawData2
+    datatable(tab)
+  })
+  
+  # Create the Data Table 3
+  output$downloadTableFilt <- DT::renderDataTable({
+    
+    
+    filteredData <- rawData2 %>% filter(TEAM == input$TeamFilt) %>% filter(Position_New == input$PosFilt)
+    datatable(filteredData)
   })
 
 })

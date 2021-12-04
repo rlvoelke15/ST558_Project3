@@ -41,7 +41,6 @@ shinyUI(fluidPage(theme = shinytheme("united"),
         )
       )
     ),
-
     tabPanel("Data Exploration", fluid = TRUE,
       sidebarLayout(
         sidebarPanel(
@@ -49,7 +48,7 @@ shinyUI(fluidPage(theme = shinytheme("united"),
             br(),
             em("If unchecked, select an NBA Team from the dropdown"),
             checkboxInput("AllTeams", "All NBA Teams"),
-            conditionalPanel(condition = "input.AllTeams == false", selectizeInput("Team", "Select a Team", choices = c("choose" = "", levels(rawData2$TEAM)), select = "Atl")),
+            conditionalPanel(condition = "input.AllTeams == false", selectizeInput("Team", "Select a Team", choices = c("choose" = "" , levels(rawData2$TEAM)), selected = "Atl")),
             radioButtons("Y1", "Select a Response Variable of Interest", choices = c("Points per Game", "Offensive Rating", "Defensive Rating")),
             conditionalPanel(condition = "input.Y1 != 'Points per Game'", radioButtons("Position", "Select a Position", choices = c("Guard" = "G", "Forward" = "F", "Center" = "C"), selected = "G")),
             conditionalPanel(condition = "input.Y1 != 'Points per Game'", sliderInput("Slider", "Minutes per Game", min = 1, max = 30, value = 1, step = 5)),
@@ -58,12 +57,15 @@ shinyUI(fluidPage(theme = shinytheme("united"),
         ),
         mainPanel(
           conditionalPanel(condition = "input.AllTeams == false & input.Y1 == 'Points per Game'", plotOutput("scatterPlot")),
+          conditionalPanel(condition = "input.AllTeams == false & input.Y1 == 'Points per Game'", uiOutput("scatterPoint")),
           conditionalPanel(condition = "input.AllTeams == true & input.Y1 == 'Points per Game'", plotOutput("scatterPlotAll")),
+          conditionalPanel(condition = "input.AllTeams == true & input.Y1 == 'Points per Game'", "Each Point Represents an Individual Player in the NBA"),
           conditionalPanel(condition = "input.AllTeams ==false & input.Y1 != 'Points per Game'", plotOutput("barPlot")),
           conditionalPanel(condition = "input.AllTeams ==false & input.Y1 != 'Points per Game'", uiOutput("avgMinPlayed")),
           conditionalPanel(condition = "input.AllTeams == true & input.Y1 != 'Points per Game'", plotOutput("barPlotAll")),
+          conditionalPanel(condition = "input.AllTeams == true & input.Y1 != 'Points per Game'", uiOutput("barSum")),
           br(),
-          dataTableOutput("table")
+          DT::dataTableOutput("table")
         )
       )
     ),
@@ -73,25 +75,27 @@ shinyUI(fluidPage(theme = shinytheme("united"),
           mainPanel(
             br(),
             wellPanel(
+              withMathJax(),
               h3("Multiple Linear Regression Model"),
               h4("Benefits"),
               "A key benefit of using Mulitiple Linear Regression is that the user has the ability to include multiple predictor variables and/or higher order terms in their model. This provides us further insight into our data that we might not have with a Single Multiple Linear Regression Model.",
+              uiOutput("math"),
               h4("Drawbacks"),
-              "INSERT DRABACKS HERE"
+              "Multiple Linear Regression is a great starting point, but it doesn't allow us to look at response variables that are non-linear in nature. A variety of assumptions must be met for us to be able to infer meaning from our Multiple Linear Regression Model. If those assumptions cannot be met, a Multiple Linear Regression Model, may not be appropriate."
             ),
             wellPanel(
               h3("Regression Tree Model"),
               h4("Benefits"),
-              "INSERT BENEFITS HERE",
+              "A regression tree model allows us to predict a continuous response variable using the mean of observations as our prediction and easily interpret our output. Unlike MLR, statistical assumptions don't need to be met when drawing inference from your model. ",
               h4("Drawbacks"),
-              "INSERT DRABACKS HERE"
+              "When using a Regression Tree Model, small changes in our data can vastly our results, which you might see when playing around on the Model Fitting Tab. Our trees usually require pruning, as well, so as not to overfit out data to training set, but this may increase our bias. "
             ),
             wellPanel(
               h3("Random Forest Tree Model"),
               h4("Benefits"),
-              "INSERT BENEFITS HERE",
+              "A Random Forest Tree Model is a great model to use when a strong predictor variable exists. Rather than relying on the strongest predictor variable in every model, a Random Forest Tree Model will randomly select the variables used in every iteration of itself.",
               h4("Drawbacks"),
-              "INSERT DRABACKS HERE"
+              "One of the drawbacks of the Random Forest Tree Model is that it can take a significant amount of time to run and a significant amount of memory on your operating system. You will notice this as well, that it may take a couple minutes for your models to run, when playing with them on the Model Fitting Tab. "
             )
           )
         ),
@@ -129,9 +133,9 @@ shinyUI(fluidPage(theme = shinytheme("united"),
               h4("Regression Tree Summary Statistics - Test Data"),
               verbatimTextOutput("regTest"),
               h4("Random Forest Tree Summary Statistics - Training Data"),
-              # verbatimTextOutput("rfTree"),
-              h4("Random Forest Tree Summary Statistics - Test Data")
-              # verbatimTextOutput("rfTreeTest")
+              verbatimTextOutput("rfTree"),
+              h4("Random Forest Tree Summary Statistics - Test Data"),
+              verbatimTextOutput("rfTreeTest")
             )
           )
         ),
@@ -167,6 +171,24 @@ shinyUI(fluidPage(theme = shinytheme("united"),
       )
     )
   ),
-    tabPanel("Data", fluid = TRUE)
-    )
+    tabPanel("Data", fluid = TRUE,
+      sidebarLayout(
+        sidebarPanel(
+          strong("Click this box if you would like to download full, unfiltered data set."),
+          checkboxInput("Unfiltered", "Unfiltered Data"),
+          conditionalPanel(condition = "input.Unfiltered == false", strong("If you would like to subset your data, filter it on below criteria, as desired.")),
+          br(),
+          conditionalPanel(condition = "input.Unfiltered == false", selectizeInput("TeamFilt", "Filter for a Specific NBA Team", choices = c("choose" = "" , levels(rawData2$TEAM)))),
+          conditionalPanel(condition = "input.Unfiltered == false", radioButtons("PosFilt", "Filter for a Specific Position", choices = c("Guard" = "G", "Forward" = "F", "Center" = "C"))),
+          strong("Click on the Button Below to Download your desired data set."),
+          br(),
+          br(),
+          actionButton("Download", "Download"),
+        ),
+        mainPanel(
+          conditionalPanel(condition = "input.Unfiltered == true", DT::dataTableOutput("downloadTable")),
+          conditionalPanel(condition = "input.Unfiltered == false", DT::dataTableOutput("downloadTableFilt"))
+        )
+      ))
+      )
 ))

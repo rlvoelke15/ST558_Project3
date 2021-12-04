@@ -27,4 +27,4 @@ Once the above code has been run, the user can run the following code in their R
 
 `shiny::runGitHub("ST558_Project3", "rlvoelke15", ref = "main", subdir = "Project3_App")`
 
-Please note I have also uploaded a separate R Markdown File with the Data Cleansing performed to clean up the raw data prior to analysis. 
+Please note I have also uploaded a separate R Markdown File with the Data Cleansing performed to clean up the original raw data (i.e. rename variables appropriately and create additional variable(s) to support more in-depth analysis. 

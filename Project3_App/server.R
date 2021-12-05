@@ -1,4 +1,8 @@
 
+## Name: Rebecca Voelker
+## Date: November 5th, 2021
+## Project 3 Shiny App
+
 library(shiny)
 
 # Define Server Logic Required to Build Application
